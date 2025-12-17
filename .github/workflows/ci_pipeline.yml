@@ -37,21 +37,19 @@ jobs:
           pip install mlflow==2.19.0 dagshub pandas scikit-learn matplotlib seaborn virtualenv
 
       - name: Run mlflow project
+        working-directory: ./MLProject
         run: |
-          # Jalankan training. Pastikan modelling.py ada di root repo baru!
-          python ../../MLProject/modelling.py
+          python modelling.py
 
       - name: Get latest MLflow run_id
         id: get_run_id
         run: |
-          # Mengambil Run ID terakhir dari DagsHub
           RUN_ID=$(python -c "import mlflow; mlflow.set_tracking_uri('${{ env.MLFLOW_TRACKING_URI }}'); print(mlflow.search_runs(experiment_names=['Water_Quality_Basic'], order_by=['start_time DESC'], max_results=1).iloc[0].run_id)")
           echo "Run ID Found: $RUN_ID"
           echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
 
       - name: Download Model & Upload to GitHub Artifacts
         run: |
-          # Kita download dulu modelnya dari DagsHub biar bisa di-upload ke GitHub Artifacts
           mlflow artifacts download --run-id ${{ steps.get_run_id.outputs.run_id }} --artifact-path model --dst-path ./downloaded_model
         
       - name: Upload to GitHub Artifacts
@@ -62,7 +60,6 @@ jobs:
 
       - name: Build Docker Model
         run: |
-          # Build image dengan nama temporary dulu
           mlflow models build-docker \
             --model-uri "runs:/${{ steps.get_run_id.outputs.run_id }}/model" \
             --name "water-quality-local:latest"
