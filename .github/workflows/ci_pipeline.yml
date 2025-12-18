@@ -40,7 +40,7 @@ jobs:
           pip install mlflow==2.19.0 dagshub pandas scikit-learn matplotlib seaborn virtualenv
 
       - name: Run mlflow project
-        working-directory: Workflow-CI/MLProject
+        working-directory: ./MLProject
         run: |
           mlflow run . --env-manager=local --experiment-name Water_Quality_Basic
 
